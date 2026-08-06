@@ -1,43 +1,27 @@
 import os
-import shutil
-import subprocess
 import sys
+import subprocess
 
-REPO_URL = "https://github.com/yawnerss/livtrmnlasdasd.git"
-REPO_DIR = "livtrmnlasdasd"
+TARGET = "/tmp/python_packages"
 
-def run(cmd):
-    print(f"\n>>> {' '.join(cmd)}")
-    subprocess.check_call(cmd)
+os.makedirs(TARGET, exist_ok=True)
 
-# Clone or update
-if os.path.exists(REPO_DIR):
-    print("[*] Repository already exists. Updating...")
-    run(["git", "-C", REPO_DIR, "pull"])
-else:
-    print("[*] Cloning repository...")
-    run(["git", "clone", REPO_URL, REPO_DIR])
+# Make packages installed into /tmp importable
+if TARGET not in sys.path:
+    sys.path.insert(0, TARGET)
 
-os.chdir(REPO_DIR)
+# Install requirements into /tmp
+subprocess.check_call([
+    sys.executable,
+    "-m",
+    "pip",
+    "install",
+    "--target",
+    TARGET,
+    "-r",
+    "requirements.txt",
+])
 
-# Install requirements
-if os.path.isfile("requirements.txt"):
-    print("[*] Installing requirements...")
-    run([
-        sys.executable,
-        "-m",
-        "pip",
-        "install",
-        "--upgrade",
-        "-r",
-        "requirements.txt"
-    ])
-else:
-    print("[!] requirements.txt not found.")
-
-# Run client.py
-if os.path.isfile("client.py"):
-    print("[*] Starting client.py...")
-    run([sys.executable, "client.py"])
-else:
-    print("[!] client.py not found.")
+# Example imports
+import requests
+import socketio
