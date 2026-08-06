@@ -1,25 +1,37 @@
+import os
 import subprocess
 import sys
-import importlib
 
-packages = {
-    "requests": "requests",
-    "socketio": "python-socketio"
-}
+REPO_URL = "https://github.com/yawnerss/livtrmnlasdasd/"
+REPO_NAME = "livtrmnlasdasd"
 
-for module_name, package_name in packages.items():
-    try:
-        importlib.import_module(module_name)
-        print(f"[✓] {package_name} is already installed.")
-    except ImportError:
-        print(f"[+] Installing {package_name}...")
-        subprocess.check_call([
-            sys.executable,
-            "-m",
-            "pip",
-            "install",
-            package_name
-        ])
-        print(f"[✓] {package_name} installed successfully.")
+# Clone the repository if it doesn't already exist
+if not os.path.exists(REPO_NAME):
+    print("[+] Cloning repository...")
+    subprocess.check_call(["git", "clone", REPO_URL])
+else:
+    print("[*] Repository already exists.")
 
-print("\nAll required modules are ready!")
+# Change to the repository directory
+os.chdir(REPO_NAME)
+
+# Install dependencies if requirements.txt exists
+if os.path.exists("requirements.txt"):
+    print("[+] Installing requirements...")
+    subprocess.check_call([
+        sys.executable,
+        "-m",
+        "pip",
+        "install",
+        "-r",
+        "requirements.txt"
+    ])
+else:
+    print("[!] requirements.txt not found.")
+
+# Run client.py if it exists
+if os.path.exists("client.py"):
+    print("[+] Starting client.py...")
+    subprocess.check_call([sys.executable, "client.py"])
+else:
+    print("[!] client.py not found.")
